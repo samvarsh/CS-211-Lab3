@@ -4,8 +4,9 @@ method_nums=${#method_names[@]}
 declare -a node_nums=("32" "64" "128" "256")
 n_node=${#node_nums[@]}
 
-output_name="final.txt"
 
+student_name=$1
+output_name="${student_name}_final.txt"
 cd ../result
 
 echo "" &> ${output_name}
@@ -17,11 +18,11 @@ do
 #	echo "${method_name}:"
 	for (( j=1; j<${n_node}+1; j++ ));
 	do
-		file_name="${method_name}_np_${node_nums[$j-1]}_output.txt"
+		file_name="${student_name}_${method_name}_np_${node_nums[$j-1]}_output.txt"
 #		echo ${file_name}
 		cat ${file_name} >> ${output_name}
 	done
 done
 
-mv sieve*.txt tmp/
+mv ${student_name}_sieve*.txt tmp/
 

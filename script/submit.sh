@@ -1,5 +1,5 @@
 #!/bin/bash
-python script_gen.py
+python script_gen.py $1
 sbatch sieve0_1.sh
 sbatch sieve0_2.sh
 sbatch sieve0_4.sh
