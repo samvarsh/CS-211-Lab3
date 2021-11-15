@@ -43,16 +43,61 @@ int main (int argc, char *argv[])
 
    /* Add you code here  */
    
+low_value = 3 + 2 * (id * ((n / 2) - 1) / p);
+   high_value = 1 + 2 * ((id + 1) * ((n / 2) - 1) / p);
+   size = ((high_value - low_value) / 2) + 1;
 
+   /* Bail out if all the primes used for sieving are
+      not all held by process 0 */
 
+   proc0_size = ((n / 2) - 1) / p;
 
+   if (((2 * proc0_size) + 3) < (long long)sqrt((double)n)) {
+       if (!id) printf("Too many processes\n");
+       MPI_Finalize();
+       exit(1);
+   }
 
+   /* Allocate this process's share of the array. */
 
+   marked = (char*)malloc(size);
 
+   if (marked == NULL) {
+       printf("Cannot allocate enough memory\n");
+       MPI_Finalize();
+       exit(1);
+   }
 
+   for (i = 0; i < size; i++) marked[i] = 0;
+   if (!id) index = 0;
+   prime = 3;
+   do {
+       if (prime * prime > low_value)
+           first = (prime * prime - low_value) / 2;
+       else {
+           if (!(low_value % prime)) first = 0;
+           else {
+               first = prime - (low_value % prime);
+               if ((low_value + first) % 2 == 0) {
+                   first = first + prime;
+               }
+               first = first / 2;
+           }
+       }
+       for (i = first; i < size; i += prime) marked[i] = 1;
+       if (!id) {
+           while (marked[++index]);
+           prime = 2 * index + 3;
+       }
+       if (p > 1) MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   } while (prime * prime <= n);
+   count = 0;
+   for (i = 0; i < size; i++)
+       if (!marked[i]) count++;
+   if (p > 1) MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM,
+       0, MPI_COMM_WORLD);
 
-
-
+   /* Stop the timer */
 
    elapsed_time += MPI_Wtime();
 
@@ -60,10 +105,13 @@ int main (int argc, char *argv[])
    /* Print the results */
 
    if (!id) {
-      printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count, elapsed_time, p);
-
+       global_count++; // 2 is even number and also a prime, so lets add it :D
+       printf("There are %d primes less than or equal to %lld\n",
+           global_count, n);
+       printf("SIEVE (%d) %10.6f\n", p, elapsed_time);
    }
-   MPI_Finalize ();
+   MPI_Finalize();
    return 0;
+
 }
 
