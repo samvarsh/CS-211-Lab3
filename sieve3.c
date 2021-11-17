@@ -17,7 +17,7 @@ int main (int argc, char *argv[])
    unsigned long int    count;        /* Local prime count */
    double elapsed_time; /* Parallel execution time */
    unsigned long int    first;        /* Index of first multiple */
-   int   local_first;
+   int   prime_first;
    unsigned long int    global_count = 0; /* Global prime count */
    unsigned long long int    high_value;   /* Highest value on this proc */
    unsigned long int    i;
@@ -25,7 +25,7 @@ int main (int argc, char *argv[])
    unsigned long int    index;        /* Index of current prime */
    unsigned long long int    low_value;    /* Lowest value on this proc */
    char  *marked;       /* Portion of 2,...,'n' */
-   char  *local_prime_marked;
+   char  *prime_marked;
    unsigned long long int    n;            /* Sieving from 2, ..., 'n' */
    int    p;            /* Number of processes */
    unsigned long int    proc0_size;   /* Size of proc 0's subarray */
@@ -33,8 +33,9 @@ int main (int argc, char *argv[])
    unsigned long int  local_prime;        /* Current prime */
    unsigned long int    size;         /* Elements in 'marked' */
    unsigned long int  local_prime_size;
-
-
+   long long last;
+   long long cache_size;
+	
    MPI_Init (&argc, &argv);
 
    /* Start the timer */
